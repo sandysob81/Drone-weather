@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Drone Weather Dashboard</title>
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #f4f6f9;
+        margin: 0;
+        padding: 0;
+        text-align: center;
+    }
+
+    #container {
+        width: 90%;
+        max-width: 500px;
+        margin: 30px auto;
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px #0002;
+    }
+
+    h2 {
+        margin-top: 0;
+        color: #333;
+    }
+
+    .data {
+        margin: 10px 0;
+        font-size: 18px;
+        font-weight: 500;
+    }
+
+    #risk {
+        margin: 15px 0;
+        padding: 10px;
+        border-radius: 8px;
+        font-size: 18px;
+        font-weight: bold;
+        color: white;
+    }
+
+    input {
+        padding: 8px;
+        width: 40%;
+        margin: 5px;
+        border-radius: 5px;
+        border: 1px solid #aaa;
+    }
+
+    button {
+        padding: 10px 20px;
+        border: none;
+        background: #007bff;
+        color: white;
+        border-radius: 5px;
+        cursor: pointer;
+        margin-top: 10px;
+    }
+
+    button:hover {
+        background: #0056b3;
+    }
+</style>
+
+</head>
+<body>
+
+<div id="container">
+    <h2>📡 Live Drone Weather</h2>
+
+    <div class="data" id="temp">Temperature: --</div>
+    <div class="data" id="wind">Wind: --</div>
+    <div class="data" id="humidity">Humidity: --</div>
+    <div class="data" id="condition">Condition: --</div>
+
+    <div id="risk">Flight Risk: --</div>
+
+    <h3>Use Your Location</h3>
+    <button onclick="useLocation()">Get Weather</button>
+
+    <h3>Or Enter Coordinates</h3>
+    <input id="lat" placeholder="Latitude">
+    <input id="lon" placeholder="Longitude">
+    <br>
+    <button onclick="manualWeather()">Update Weather</button>
+</div>
+
+<script>
+const API_KEY = "a450b5efb217120de10b1c84bb11a906"; // Your API key
+
+function updateRisk(wind) {
+    const box = document.getElementById("risk");
+
+    if (wind < 5) {
+        box.style.background = "green";
+        box.textContent = "Flight Risk: LOW (Safe)";
+    } else if (wind < 10) {
+        box.style.background = "orange";
+        box.textContent = "Flight Risk: MEDIUM (Use Caution)";
+    } else {
+        box.style.background = "red";
+        box.textContent = "Flight Risk: HIGH (Unsafe)";
+    }
+}
+
+async function getWeather(lat, lon) {
+    const url = 
+      `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric`;
+
+    const res = await fetch(url);
+    const data = await res.json();
+
+    document.getElementById("temp").textContent = `Temperature: ${data.main.temp} °C`;
+    document.getElementById("wind").textContent = `Wind: ${data.wind.speed} m/s`;
+    document.getElementById("humidity").textContent = `Humidity: ${data.main.humidity}%`;
+    document.getElementById("condition").textContent = `Condition: ${data.weather[0].description}`;
+
+    updateRisk(data.wind.speed);
+}
+
+function useLocation() {
+    if (!navigator.geolocation) {
+        alert("Location not supported—enter Lat/Lon manually.");
+        return;
+    }
+
+    navigator.geolocation.getCurrentPosition(pos => {
+        const lat = pos.coords.latitude;
+        const lon = pos.coords.longitude;
+        getWeather(lat, lon);
+    });
+}
+
+function manualWeather() {
+    const lat = parseFloat(document.getElementById("lat").value);
+    const lon = parseFloat(document.getElementById("lon").value);
+
+    if (!lat || !lon) {
+        alert("Enter valid coordinates.");
+        return;
+    }
+
+    getWeather(lat, lon);
+}
+</script>
+
+</body>
+</html>
