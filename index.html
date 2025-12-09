@@ -6,63 +6,95 @@
 
 <style>
     body {
-        font-family: Arial, sans-serif;
-        background: #f4f6f9;
+        font-family: "Segoe UI", Arial, sans-serif;
+        background: linear-gradient(135deg, #e8f0ff, #f7fbff);
         margin: 0;
         padding: 0;
-        text-align: center;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        min-height: 100vh;
     }
 
     #container {
-        width: 90%;
-        max-width: 500px;
-        margin: 30px auto;
-        background: white;
-        padding: 20px;
-        border-radius: 10px;
-        box-shadow: 0 0 10px #0002;
+        width: 92%;
+        max-width: 550px;
+        background: #ffffff;
+        margin: 25px auto;
+        padding: 25px;
+        border-radius: 16px;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+        animation: fadeIn 0.5s ease;
+        text-align: center;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
     }
 
     h2 {
         margin-top: 0;
-        color: #333;
+        font-size: 26px;
+        color: #234;
+        font-weight: 600;
+    }
+
+    .weather-icon {
+        width: 80px;
+        height: 80px;
+        margin: 10px auto;
     }
 
     .data {
-        margin: 10px 0;
-        font-size: 18px;
+        margin: 12px 0;
+        font-size: 20px;
         font-weight: 500;
+        color: #333;
     }
 
     #risk {
-        margin: 15px 0;
-        padding: 10px;
-        border-radius: 8px;
-        font-size: 18px;
+        margin: 20px 0;
+        padding: 15px;
+        border-radius: 12px;
+        font-size: 20px;
         font-weight: bold;
         color: white;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
     }
 
     input {
-        padding: 8px;
-        width: 40%;
-        margin: 5px;
-        border-radius: 5px;
-        border: 1px solid #aaa;
+        padding: 12px;
+        width: 42%;
+        margin: 7px;
+        border-radius: 10px;
+        border: 1px solid #bbb;
+        font-size: 16px;
     }
 
     button {
-        padding: 10px 20px;
+        padding: 12px 24px;
         border: none;
-        background: #007bff;
+        background: #0069ff;
         color: white;
-        border-radius: 5px;
+        border-radius: 10px;
         cursor: pointer;
+        font-size: 16px;
+        font-weight: 600;
         margin-top: 10px;
+        transition: 0.2s ease;
+        box-shadow: 0 3px 10px rgba(0,105,255,0.3);
     }
 
     button:hover {
-        background: #0056b3;
+        background: #0051c7;
+        transform: scale(1.03);
+    }
+
+    hr {
+        margin: 25px 0;
+        border: none;
+        border-top: 1px solid #eee;
     }
 </style>
 
@@ -72,6 +104,8 @@
 <div id="container">
     <h2>📡 Live Drone Weather</h2>
 
+    <img id="icon" class="weather-icon" src="" alt="Weather Icon">
+
     <div class="data" id="temp">Temperature: --</div>
     <div class="data" id="wind">Wind: --</div>
     <div class="data" id="humidity">Humidity: --</div>
@@ -79,10 +113,14 @@
 
     <div id="risk">Flight Risk: --</div>
 
-    <h3>Use Your Location</h3>
+    <hr>
+
+    <h3>📍 Use Your Location</h3>
     <button onclick="useLocation()">Get Weather</button>
 
-    <h3>Or Enter Coordinates</h3>
+    <hr>
+
+    <h3>🔢 Enter Coordinates</h3>
     <input id="lat" placeholder="Latitude">
     <input id="lon" placeholder="Longitude">
     <br>
@@ -108,7 +146,7 @@ function updateRisk(wind) {
 }
 
 async function getWeather(lat, lon) {
-    const url = 
+    const url =
       `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric`;
 
     const res = await fetch(url);
@@ -118,6 +156,10 @@ async function getWeather(lat, lon) {
     document.getElementById("wind").textContent = `Wind: ${data.wind.speed} m/s`;
     document.getElementById("humidity").textContent = `Humidity: ${data.main.humidity}%`;
     document.getElementById("condition").textContent = `Condition: ${data.weather[0].description}`;
+
+    // Weather icon
+    document.getElementById("icon").src =
+        `http://openweathermap.org/img/wn/${data.weather[0].icon}@4x.png`;
 
     updateRisk(data.wind.speed);
 }
@@ -143,10 +185,10 @@ function manualWeather() {
         alert("Enter valid coordinates.");
         return;
     }
-
     getWeather(lat, lon);
 }
 </script>
 
 </body>
 </html>
+
