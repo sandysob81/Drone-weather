@@ -5,103 +5,125 @@
 <title>Drone Weather Dashboard</title>
 
 <style>
+    /* ----- GLOBAL DARK BACKGROUND ----- */
     body {
         font-family: "Segoe UI", Arial, sans-serif;
-        background: linear-gradient(135deg, #e8f0ff, #f7fbff);
+        background: linear-gradient(135deg, #0d1117, #1a1f27);
         margin: 0;
         padding: 0;
         display: flex;
         justify-content: center;
-        align-items: flex-start;
+        align-items: center;
         min-height: 100vh;
+        color: #fff;
     }
 
+    /* ----- GLASS / FROSTED PANEL ----- */
     #container {
         width: 92%;
-        max-width: 550px;
-        background: #ffffff;
-        margin: 25px auto;
-        padding: 25px;
-        border-radius: 16px;
-        box-shadow: 0 8px 20px rgba(0,0,0,0.12);
-        animation: fadeIn 0.5s ease;
+        max-width: 520px;
+        padding: 30px;
+        background: rgba(255, 255, 255, 0.08);
+        border-radius: 18px;
+        box-shadow: 0 10px 35px rgba(0,0,0,0.4);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
         text-align: center;
+        animation: fadeIn 0.6s ease-out;
+        border: 1.2px solid rgba(255, 255, 255, 0.15);
     }
 
     @keyframes fadeIn {
         from { opacity: 0; transform: translateY(20px); }
-        to { opacity: 1; transform: translateY(0); }
+        to { opacity: 1; transform: translateY(0px); }
     }
 
     h2 {
         margin-top: 0;
-        font-size: 26px;
-        color: #234;
+        font-size: 28px;
         font-weight: 600;
+        color: #e6e9ef;
+        letter-spacing: 0.5px;
     }
 
+    /* Weather icon */
     .weather-icon {
-        width: 80px;
-        height: 80px;
-        margin: 10px auto;
+        width: 90px;
+        height: 90px;
+        margin: 12px auto;
+        filter: drop-shadow(0 0 8px rgba(255,255,255,0.25));
     }
 
     .data {
         margin: 12px 0;
         font-size: 20px;
         font-weight: 500;
-        color: #333;
+        color: #d4d7dd;
     }
 
+    /* ----- FLIGHT RISK CARD ----- */
     #risk {
-        margin: 20px 0;
-        padding: 15px;
+        margin: 22px 0;
+        padding: 16px;
         border-radius: 12px;
         font-size: 20px;
         font-weight: bold;
         color: white;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        box-shadow: 0 0 15px rgba(0,0,0,0.35);
+        transition: 0.3s ease;
     }
 
+    /* Inputs */
     input {
         padding: 12px;
         width: 42%;
         margin: 7px;
         border-radius: 10px;
-        border: 1px solid #bbb;
+        border: 1px solid rgba(255,255,255,0.2);
+        background: rgba(255,255,255,0.09);
+        color: #fff;
         font-size: 16px;
+        outline: none;
+        backdrop-filter: blur(4px);
     }
 
+    input::placeholder {
+        color: #bfc4cc;
+    }
+
+    /* ----- BUTTONS ----- */
     button {
-        padding: 12px 24px;
+        padding: 12px 26px;
         border: none;
-        background: #0069ff;
+        background: linear-gradient(135deg, #007bff, #00aaff);
         color: white;
         border-radius: 10px;
         cursor: pointer;
-        font-size: 16px;
+        font-size: 17px;
         font-weight: 600;
-        margin-top: 10px;
-        transition: 0.2s ease;
-        box-shadow: 0 3px 10px rgba(0,105,255,0.3);
+        margin-top: 12px;
+        letter-spacing: 0.3px;
+        transition: 0.25s ease-in-out;
+        box-shadow: 0 6px 20px rgba(0,153,255,0.35);
     }
 
     button:hover {
-        background: #0051c7;
-        transform: scale(1.03);
+        transform: scale(1.05);
+        box-shadow: 0 8px 25px rgba(0,153,255,0.5);
     }
 
     hr {
-        margin: 25px 0;
+        margin: 28px 0;
         border: none;
-        border-top: 1px solid #eee;
+        border-top: 1px solid rgba(255,255,255,0.12);
     }
 </style>
-
 </head>
+
 <body>
 
 <div id="container">
+
     <h2>📡 Live Drone Weather</h2>
 
     <img id="icon" class="weather-icon" src="" alt="Weather Icon">
@@ -116,11 +138,11 @@
     <hr>
 
     <h3>📍 Use Your Location</h3>
-    <button onclick="useLocation()">Get Weather</button>
+    <button onclick="useLocation()">Get Live Weather</button>
 
     <hr>
 
-    <h3>🔢 Enter Coordinates</h3>
+    <h3>🔢 Or Enter Coordinates</h3>
     <input id="lat" placeholder="Latitude">
     <input id="lon" placeholder="Longitude">
     <br>
@@ -128,19 +150,19 @@
 </div>
 
 <script>
-const API_KEY = "a450b5efb217120de10b1c84bb11a906"; // Your API key
+const API_KEY = "a450b5efb217120de10b1c84bb11a906";
 
 function updateRisk(wind) {
     const box = document.getElementById("risk");
 
     if (wind < 5) {
-        box.style.background = "green";
+        box.style.background = "rgba(40, 167, 69, 0.8)";
         box.textContent = "Flight Risk: LOW (Safe)";
     } else if (wind < 10) {
-        box.style.background = "orange";
-        box.textContent = "Flight Risk: MEDIUM (Use Caution)";
+        box.style.background = "rgba(255, 165, 0, 0.8)";
+        box.textContent = "Flight Risk: MEDIUM (Caution)";
     } else {
-        box.style.background = "red";
+        box.style.background = "rgba(220, 53, 69, 0.8)";
         box.textContent = "Flight Risk: HIGH (Unsafe)";
     }
 }
@@ -157,7 +179,6 @@ async function getWeather(lat, lon) {
     document.getElementById("humidity").textContent = `Humidity: ${data.main.humidity}%`;
     document.getElementById("condition").textContent = `Condition: ${data.weather[0].description}`;
 
-    // Weather icon
     document.getElementById("icon").src =
         `http://openweathermap.org/img/wn/${data.weather[0].icon}@4x.png`;
 
@@ -165,30 +186,18 @@ async function getWeather(lat, lon) {
 }
 
 function useLocation() {
-    if (!navigator.geolocation) {
-        alert("Location not supported—enter Lat/Lon manually.");
-        return;
-    }
-
     navigator.geolocation.getCurrentPosition(pos => {
-        const lat = pos.coords.latitude;
-        const lon = pos.coords.longitude;
-        getWeather(lat, lon);
+        getWeather(pos.coords.latitude, pos.coords.longitude);
     });
 }
 
 function manualWeather() {
     const lat = parseFloat(document.getElementById("lat").value);
     const lon = parseFloat(document.getElementById("lon").value);
-
-    if (!lat || !lon) {
-        alert("Enter valid coordinates.");
-        return;
-    }
+    if (!lat || !lon) { alert("Enter valid coordinates."); return; }
     getWeather(lat, lon);
 }
 </script>
 
 </body>
 </html>
-
