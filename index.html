@@ -18,7 +18,7 @@
         color: #fff;
     }
 
-    /* ----- GLASS / FROSTED PANEL ----- */
+    /* ----- GLASS PANEL ----- */
     #container {
         width: 92%;
         max-width: 520px;
@@ -38,16 +38,9 @@
         to { opacity: 1; transform: translateY(0px); }
     }
 
-    h2 {
-        margin-top: 0;
-        font-size: 28px;
-        font-weight: 600;
-        color: #e6e9ef;
-    }
-
     .top-btn {
         display: inline-block;
-        margin-bottom: 15px;
+        margin-bottom: 20px;
         padding: 10px 18px;
         background: linear-gradient(135deg, #00aaff, #007bff);
         border-radius: 8px;
@@ -58,11 +51,25 @@
         box-shadow: 0 4px 14px rgba(0,153,255,0.3);
     }
 
+    h2 {
+        margin-top: 0;
+        font-size: 28px;
+        font-weight: 600;
+    }
+
     .weather-icon {
         width: 90px;
         height: 90px;
         margin: 12px auto;
         filter: drop-shadow(0 0 8px rgba(255,255,255,0.25));
+    }
+
+    .arrow {
+        width: 60px;
+        height: 60px;
+        margin-top: 10px;
+        transition: 0.4s ease;
+        filter: drop-shadow(0 0 5px rgba(255,255,255,0.3));
     }
 
     .data {
@@ -111,9 +118,9 @@
 
 <div id="container">
 
-    <!-- Return button -->
-    <a class="top-btn" href="https://survey123.arcgis.com/share/780efb88fb6649e0a5c88dd981b91ebb">
-        🔙 Return to Survey Form
+    <!-- Return to survey without restarting -->
+    <a class="top-btn" href="javascript:history.back()">
+        🔙 Return to Survey
     </a>
 
     <h2>📡 Live Drone Weather</h2>
@@ -121,7 +128,11 @@
     <img id="icon" class="weather-icon" src="" alt="Weather Icon">
 
     <div class="data" id="temp">Temperature: --</div>
-    <div class="data" id="wind">Wind: --</div>
+    <div class="data" id="wind">Wind Speed: --</div>
+    <div class="data" id="direction">Wind Direction: --</div>
+
+    <img id="arrow" class="arrow" src="https://img.icons8.com/ios-filled/100/ffffff/arrow.png" alt="Wind Arrow">
+
     <div class="data" id="humidity">Humidity: --</div>
     <div class="data" id="condition">Condition: --</div>
 
@@ -129,7 +140,7 @@
 
     <hr>
 
-    <h3>🔢 Enter Coordinates (Fallback if GPS blocked)</h3>
+    <h3>🔢 Manual Coordinates (If GPS blocked)</h3>
     <input id="lat" placeholder="Latitude">
     <input id="lon" placeholder="Longitude">
     <br>
@@ -138,6 +149,12 @@
 
 <script>
 const API_KEY = "a450b5efb217120de10b1c84bb11a906";
+
+/* Convert degrees to compass direction */
+function degToCompass(deg) {
+    const dirs = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
+    return dirs[Math.round(deg / 45) % 8];
+}
 
 function updateRisk(wind) {
     const box = document.getElementById("risk");
@@ -162,7 +179,17 @@ async function getWeather(lat, lon) {
     const data = await res.json();
 
     document.getElementById("temp").textContent = `Temperature: ${data.main.temp} °C`;
-    document.getElementById("wind").textContent = `Wind: ${data.wind.speed} m/s`;
+    document.getElementById("wind").textContent = `Wind Speed: ${data.wind.speed} m/s`;
+
+    let deg = data.wind.deg;
+    let dir = degToCompass(deg);
+
+    document.getElementById("direction").textContent =
+        `Wind Direction: ${dir} (${deg}°)`;
+
+    // Rotate arrow based on wind direction
+    document.getElementById("arrow").style.transform = `rotate(${deg}deg)`;
+
     document.getElementById("humidity").textContent = `Humidity: ${data.main.humidity}%`;
     document.getElementById("condition").textContent = `Condition: ${data.weather[0].description}`;
 
@@ -172,32 +199,24 @@ async function getWeather(lat, lon) {
     updateRisk(data.wind.speed);
 }
 
-/* AUTO-LOAD WEATHER WHEN PAGE OPENS */
+/* AUTO LOAD WEATHER */
 window.onload = function() {
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-            pos => {
-                getWeather(pos.coords.latitude, pos.coords.longitude);
-            },
-            err => {
-                console.log("GPS blocked, waiting for manual entry.");
-            }
-        );
-    }
+    navigator.geolocation.getCurrentPosition(
+        pos => getWeather(pos.coords.latitude, pos.coords.longitude),
+        () => console.log("GPS blocked, waiting for manual input.")
+    );
 };
 
-/* Manual Coordinates Mode */
+/* Manual Entry */
 function manualWeather() {
     const lat = parseFloat(document.getElementById("lat").value);
     const lon = parseFloat(document.getElementById("lon").value);
-    if (!lat || !lon) { 
-        alert("Enter valid coordinates.");
-        return;
-    }
+    if (!lat || !lon) { alert("Enter valid coordinates."); return; }
     getWeather(lat, lon);
 }
 </script>
 
 </body>
 </html>
+
 
